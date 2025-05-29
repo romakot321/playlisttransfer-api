@@ -11,6 +11,7 @@ class IHTTPClient(abc.ABC, Generic[TResponse]):
         url: str,
         headers: dict[str, str] | None = None,
         params: dict[str, str | int] | None = None,
+        **kwargs
     ) -> TResponse: ...
 
     @abc.abstractmethod

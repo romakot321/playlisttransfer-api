@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 class MusicSource(str, Enum):
     SPOTIFY = "spotify"
+    YOUTUBE = "YOUTUBE"
 
 
 class Playlist(BaseModel):
@@ -28,3 +29,4 @@ class Track(BaseModel):
     source: MusicSource
     name: str
     artist_name: str
+    image_url: str | None = None

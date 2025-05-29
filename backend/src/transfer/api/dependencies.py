@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException, Query
-from src.integration.api.dependencies import get_spotify_client
+from src.integration.api.dependencies import get_spotify_client, get_youtube_client
 from src.transfer.application.interfaces.transfer_client import ITransferClient
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
 from src.transfer.domain.entities import TransferSource
@@ -10,6 +10,8 @@ from src.transfer.infrastructure.db.unit_of_work import PGTransferUnitOfWork
 def get_transfer_client(source: TransferSource = Query()) -> ITransferClient:
     if source == TransferSource.SPOTIFY:
         return get_spotify_client()
+    if source == TransferSource.YOUTUBE:
+        return get_youtube_client()
     raise HTTPException(400, detail="Source not implemented yet")
 
 

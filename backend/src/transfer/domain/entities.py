@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class TransferSource(str, Enum):
     SPOTIFY = "spotify"
+    YOUTUBE = "youtube"
 
 
 class TransferStatus(str, Enum):

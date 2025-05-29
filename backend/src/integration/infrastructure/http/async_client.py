@@ -33,6 +33,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
         url: str,
         headers: dict[str, str] | None = None,
         params: dict[str, str | int] | None = None,
+        **kwargs
     ) -> dict:
         async with aiohttp.ClientSession() as session:
             response = await session.get(url, headers=headers, params=params)

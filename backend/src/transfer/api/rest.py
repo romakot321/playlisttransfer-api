@@ -11,8 +11,9 @@ from src.transfer.application.use_cases.list_user_playlists import ListUserPlayl
 from src.transfer.application.use_cases.run_album_transfer import RunAlbumTransferUseCase
 from src.transfer.application.use_cases.run_playlist_transfer import RunPlaylistTransferUseCase
 from src.transfer.domain.dtos import PlaylistReadDTO, PlaylistTracksListDTO, TrackReadDTO, TransferAlbumCreateDTO, TransferPlaylistCreateDTO, TransferReadDTO, UserAlbumListDTO, UserPlaylistListDTO, UserSourceConnectDTO
+from src.core.auth import validate_api_token_header
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(validate_api_token_header)])
 
 
 @router.post("/source/connect", status_code=202)

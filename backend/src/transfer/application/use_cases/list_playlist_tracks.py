@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from src.db.exceptions import DBModelNotFoundException
+from backend.src.transfer.application.integration_utils import get_transfer_token
 from src.integration.domain.entities import Track
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
@@ -13,7 +14,7 @@ class ListPlaylistTracksUseCase:
 
     async def execute(self, dto: PlaylistTracksListDTO) -> list[Track]:
         async with self.uow:
-            token = await self.get_transfer_token(dto)
+            token = await get_transfer_token(self.uow, self.transfer_client, dto.user_id, dto.app_bundle)
             tracks = await self.transfer_client.get_user_playlist_tracks(token, dto.playlist_id)
         return tracks
 

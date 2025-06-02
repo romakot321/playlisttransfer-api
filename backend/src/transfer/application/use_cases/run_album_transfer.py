@@ -3,6 +3,7 @@ from loguru import logger
 import datetime as dt
 from fastapi import HTTPException
 from src.db.exceptions import DBModelNotFoundException
+from backend.src.transfer.application.integration_utils import get_transfer_token
 from src.integration.domain.entities import Album, Track
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
@@ -50,16 +51,8 @@ class RunAlbumTransferUseCase:
         await self.to_transfer_client.add_user_album(self._to_token, album.name, album.artist_name)
 
     async def get_from_transfer_token(self, dto: TransferAlbumCreateDTO) -> None:
-        try:
-            source_token = await self.uow.source_tokens.get_by_user(dto.user_id, dto.app_bundle, self.from_transfer_client.SOURCE)
-        except DBModelNotFoundException:
-            raise HTTPException(400, detail="Source for user not connected")
-        self._from_token = await self.from_transfer_client.parse_and_validate_token(source_token.token_data)
+        self._from_token = await get_transfer_token(self.uow, self.from_transfer_client, dto.user_id, dto.app_bundle)
 
     async def get_to_transfer_token(self, dto: TransferAlbumCreateDTO) -> None:
-        try:
-            source_token = await self.uow.source_tokens.get_by_user(dto.user_id, dto.app_bundle, self.to_transfer_client.SOURCE)
-        except DBModelNotFoundException:
-            raise HTTPException(400, detail="Source for user not connected")
-        self._to_token = await self.to_transfer_client.parse_and_validate_token(source_token.token_data)
+        self._to_token = await get_transfer_token(self.uow, self.to_transfer_client, dto.user_id, dto.app_bundle)
 

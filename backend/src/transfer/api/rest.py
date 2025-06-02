@@ -35,11 +35,6 @@ async def start_album_transfer(data: TransferAlbumCreateDTO, from_transfer_clien
     return transfer
 
 
-@router.get("/{transfer_id}", response_model=TransferReadDTO)
-async def get_transfer(transfer_id: UUID, uow: TransferUoWDepend):
-    return await GetTransferUseCase(uow).execute(transfer_id)
-
-
 @router.get("/playlist", response_model=list[PlaylistReadDTO])
 async def get_user_playlists(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: UserPlaylistListDTO = Depends()):
     return await ListUserPlaylistsUseCase(transfer_client, uow).execute(params)
@@ -58,4 +53,9 @@ async def get_user_album_tracks(transfer_client: TransferClientDepend, uow: Tran
 @router.get("/album", response_model=list[PlaylistReadDTO])
 async def get_user_albums(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: UserAlbumListDTO = Depends()):
     return await ListUserAlbumsUseCase(transfer_client, uow).execute(params)
+
+
+@router.get("/{transfer_id}", response_model=TransferReadDTO)
+async def get_transfer(transfer_id: UUID, uow: TransferUoWDepend):
+    return await GetTransferUseCase(uow).execute(transfer_id)
 

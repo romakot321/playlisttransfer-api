@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AliasChoices
 
 
 class YoutubeToken(BaseModel):
-    token: str
-    refresh_token: str
+    token: str = Field(validation_alias=AliasChoices("token", "access_token"))
+    refresh_token: str = Field(validation_alias=AliasChoices("refresh_token"))
 
 
 class YoutubeResponse(BaseModel):

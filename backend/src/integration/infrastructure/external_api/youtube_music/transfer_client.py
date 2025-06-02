@@ -1,9 +1,9 @@
 import json
 from typing import TypeVar
 from pydantic import BaseModel, ValidationError
-from backend.src.integration.application.interfaces.http_client import IHTTPClient
-from backend.src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError
-from backend.src.integration.infrastructure.http.api_client import HTTPApiClient
+from src.integration.application.interfaces.http_client import IHTTPClient
+from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError
+from src.integration.infrastructure.http.api_client import HTTPApiClient
 from src.integration.domain.entities import Album, MusicSource, Playlist, Track
 from src.integration.infrastructure.external_api.youtube_music.entities import YoutubePlaylist, YoutubeResponse, YoutubeToken, YoutubeTrack
 from src.transfer.application.interfaces.transfer_client import ITransferClient

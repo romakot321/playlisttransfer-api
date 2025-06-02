@@ -1,5 +1,5 @@
 from typing import Literal
-from backend.src.integration.application.interfaces.http_client import IHTTPClient
+from src.integration.application.interfaces.http_client import IHTTPClient
 
 
 class HTTPApiClient:

@@ -27,7 +27,7 @@ class PGTransferRepository(ITransferRepository):
             await self.session.flush()
         except IntegrityError as e:
             try:
-                detail = "Transfer can't be created. " + str(e.orig).split('\nDETAIL:  ')[1]
+                detail = "Transfer can't be created. " + str(e.orig)
             except IndexError:
                 detail = "Transfer can't be created due to integrity error."
             raise DBModelConflictException(detail)

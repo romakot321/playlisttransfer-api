@@ -21,15 +21,15 @@ class SpotifyResponse(BaseModel):
 class SpotifyPlaylist(BaseModel):
     class SpotifyPlaylistImage(BaseModel):
         url: str
-        width: int
-        height: int
+        width: int | None = None
+        height: int | None = None
 
     class SpotifyPlaylistTracksInfo(BaseModel):
         total: int
 
     description: str | None = None
     id: str
-    images: list[SpotifyPlaylistImage] = Field(description="Expire in 1 day")
+    images: list[SpotifyPlaylistImage] | None = Field(description="Expire in 1 day", default=None)
     name: str
     uri: str
     tracks: SpotifyPlaylistTracksInfo
@@ -61,7 +61,6 @@ class SpotifyAlbum(BaseModel):
         name: str
         uri: str
         artists: list[SpotifyAlbumArtist]
-        label: str
 
     album: SpotifyAlbumData
 

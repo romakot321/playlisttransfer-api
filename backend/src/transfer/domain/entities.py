@@ -26,6 +26,9 @@ class Transfer(BaseModel):
 class TransferCreate(BaseModel):
     user_id: str
     app_bundle: str
+    from_source: TransferSource
+    to_source: TransferSource
+    status: TransferStatus = TransferStatus.queued
 
 
 class TransferUpdate(BaseModel):

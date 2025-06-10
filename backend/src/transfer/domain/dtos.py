@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, Field
 
-from src.transfer.domain.entities import TransferSource
+from src.transfer.domain.entities import TransferSource, TransferStatus
 
 
 class UserSourceConnectDTO(BaseModel):
@@ -47,6 +47,8 @@ class TransferAlbumCreateDTO(BaseModel):
 
 class TransferReadDTO(BaseModel):
     id: UUID
+    status: TransferStatus
+    error: str | None = None
     user_id: str
     app_bundle: str
 

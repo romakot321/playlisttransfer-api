@@ -13,7 +13,7 @@ services:
       default:
     volumes:
       - app_localstorage:/app/storage
-      - ./logs/fastapi:/app/logs
+      - app_logs:/app/logs
 
   db:
     image: postgres:latest
@@ -39,4 +39,5 @@ networks:
 
 volumes:
   postgres_data:
+  app_logs:
   app_localstorage:

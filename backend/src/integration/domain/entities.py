@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class MusicSource(str, Enum):
     SPOTIFY = "spotify"
-    YOUTUBE = "YOUTUBE"
+    YOUTUBE = "youtube"
 
 
 class Playlist(BaseModel):

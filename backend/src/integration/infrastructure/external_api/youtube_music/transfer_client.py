@@ -24,7 +24,7 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
         self.api = HTTPApiClient(http_client, self.API_URL)
 
     async def get_user_playlists(self, token: YoutubeToken) -> list[Playlist]:
-        response = await self.api.request("GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": True})
+        response = await self.api.request("GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": 1})
         playlists = self._parse_response(response, YoutubePlaylist)
         return [self._playlist_to_domain(playlist) for playlist in playlists]
 

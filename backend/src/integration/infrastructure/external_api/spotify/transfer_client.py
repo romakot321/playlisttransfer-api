@@ -1,5 +1,5 @@
 import base64
-
+from loguru import logger
 from pydantic import ValidationError
 
 from src.integration.application.interfaces.http_client import IHTTPClient
@@ -168,7 +168,6 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         return album.album.id
 
     async def _refresh_token(self, token: SpotifyToken) -> SpotifyToken:
-        print({"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id})
         response = await self.http_client.post(
             "https://accounts.spotify.com/api/token",
             form={"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id},
@@ -188,8 +187,9 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         
         try:
             await self._get_current_user_info(token.access_token)
-        except ExternalApiUnauthorizedError:
+        except ExternalApiUnauthorizedError as e:
             token = await self._refresh_token(token)
+            logger.debug(f"Refreshed token: {token}")
 
         return token
 

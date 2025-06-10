@@ -3,7 +3,7 @@ from loguru import logger
 import datetime as dt
 from fastapi import HTTPException
 from src.db.exceptions import DBModelNotFoundException
-from backend.src.transfer.application.integration_utils import get_transfer_token
+from src.transfer.application.integration_utils import get_transfer_token
 from src.integration.domain.entities import Album, Track
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
@@ -43,6 +43,8 @@ class RunAlbumTransferUseCase:
 
     async def get_album_to_transfer(self, dto: TransferAlbumCreateDTO) -> Album:
         albums = await self.from_transfer_client.get_user_albums(self._from_token)
+        logger.debug(albums)
+        return [i for i in albums if i.source_id == dto.album_id][0]
         return next(
             filter(lambda i: i.source_id == dto.album_id, albums)
         )

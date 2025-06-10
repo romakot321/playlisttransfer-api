@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from src.db.exceptions import DBModelNotFoundException
-from backend.src.transfer.application.integration_utils import get_transfer_token
-from backend.src.transfer.domain.entities import SourceTokenUpdate
+from src.transfer.application.integration_utils import get_transfer_token
+from src.transfer.domain.entities import SourceTokenUpdate
 from src.integration.domain.entities import Playlist
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork

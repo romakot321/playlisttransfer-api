@@ -1,5 +1,6 @@
 from typing import Generic
 from fastapi import HTTPException
+from loguru import logger
 
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.integration.domain.entities import Playlist

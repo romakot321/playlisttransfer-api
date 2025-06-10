@@ -23,7 +23,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
             )
             if response.status == 401:
                 raise ExternalApiUnauthorizedError()
-            if response.status != 200:
+            if not response.ok:
                 raise ExternalApiError(await response.text())
             body = await response.json()
         return body
@@ -39,7 +39,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
             response = await session.get(url, headers=headers, params=params)
             if response.status == 401:
                 raise ExternalApiUnauthorizedError()
-            if response.status != 200:
+            if not response.ok:
                 raise ExternalApiError(await response.text())
             body = await response.json()
         return body
@@ -52,7 +52,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
         json: dict | None = None,
         data: str | None = None,
         form: dict[str, str | int] | str | None = None
-    ) -> dict:
+    ) -> dict | None:
         if isinstance(form, dict):
             form = "&".join(f"{k}={v}" for k, v in form.items())
             data = (data or "") + form
@@ -62,7 +62,10 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
             )
             if response.status == 401:
                 raise ExternalApiUnauthorizedError()
-            if response.status != 200:
+            if not response.ok:
                 raise ExternalApiError(await response.text())
-            body = await response.json()
+            try:
+                body = await response.json()
+            except aiohttp.client_exceptions.ContentTypeError:
+                body = None
         return body

@@ -1,4 +1,5 @@
 import json
+from loguru import logger
 from typing import TypeVar
 from pydantic import BaseModel, ValidationError
 from src.integration.application.interfaces.http_client import IHTTPClient
@@ -50,17 +51,18 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
 
     async def get_user_playlists(self, token: YoutubeToken) -> list[Playlist]:
         response = await self.api.request(
-            "GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": 1}
+            "GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": 1, "part": "snippet,id"}
         )
         playlists = self._parse_response(response, YoutubePlaylist)
         return [self._playlist_to_domain(playlist) for playlist in playlists]
 
     async def get_user_playlist_tracks(self, token: YoutubeToken, playlist_id: str) -> list[Track]:
+        logger.debug({"playlistId": playlist_id, "maxResults": 50, "part": "snippet"})
         response = await self.api.request(
             "GET",
             "/youtube/v3/playlistItems",
             bearer_token=token.token,
-            params={"playlistId": playlist_id, "maxResults": 50},
+            params={"playlistId": playlist_id, "maxResults": 50, "part": "snippet"},
         )
         tracks = self._parse_response(response, YoutubeTrack)
         return [self._track_to_domain(track) for track in tracks]

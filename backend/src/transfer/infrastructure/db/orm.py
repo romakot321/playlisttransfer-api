@@ -8,6 +8,7 @@ class TransferDB(BaseMixin, Base):
     from_source: Mapped[str]
     to_source: Mapped[str]
     status: Mapped[str]
+    result: Mapped[str | None]
     user_id: Mapped[str]
     app_bundle: Mapped[str]
     error: Mapped[str | None]

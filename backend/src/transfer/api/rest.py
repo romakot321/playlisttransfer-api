@@ -7,6 +7,7 @@ from src.transfer.application.use_cases.create_transfer import CreateTransferUse
 from src.transfer.application.use_cases.get_transfer import GetTransferUseCase
 from src.transfer.application.use_cases.list_playlist_tracks import ListPlaylistTracksUseCase
 from src.transfer.application.use_cases.list_user_albums import ListUserAlbumsUseCase
+from src.transfer.application.use_cases.list_user_favorite_tracks import ListUserFavoriteTracksUseCase
 from src.transfer.application.use_cases.list_user_playlists import ListUserPlaylistsUseCase
 from src.transfer.application.use_cases.run_album_transfer import RunAlbumTransferUseCase
 from src.transfer.application.use_cases.run_playlist_transfer import RunPlaylistTransferUseCase
@@ -38,6 +39,11 @@ async def start_album_transfer(data: TransferAlbumCreateDTO, from_transfer_clien
 @router.get("/playlist", response_model=list[PlaylistReadDTO])
 async def get_user_playlists(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: UserPlaylistListDTO = Depends()):
     return await ListUserPlaylistsUseCase(transfer_client, uow).execute(params)
+
+
+@router.get("/favorite", response_model=list[TrackReadDTO])
+async def get_user_favorite_tracks(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: PlaylistTracksListDTO = Depends()):
+    return await ListUserFavoriteTracksUseCase(transfer_client, uow).execute(params)
 
 
 @router.get("/playlist/tracks", response_model=list[TrackReadDTO])

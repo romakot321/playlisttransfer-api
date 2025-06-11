@@ -16,6 +16,7 @@ services:
       - app_logs:/app/logs
 
   db:
+    &db
     image: postgres:latest
     container_name: playlisttransferapi_db
     volumes:
@@ -32,6 +33,14 @@ services:
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       default:
+
+  db-dev:
+    <<: *db
+    container_name: playlisttransferapi_dev_db
+    profiles:
+      - dev
+    ports:
+      - "5432:5432"
 
 networks:
   global_network:

@@ -11,6 +11,7 @@ class Playlist(BaseModel):
     source_id: str
     source: MusicSource
     name: str
+    url: str | None = None
     tracks_count: int | None = None
     image_url: str | None = None
 

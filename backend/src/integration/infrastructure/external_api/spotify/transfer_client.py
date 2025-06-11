@@ -1,23 +1,26 @@
 import base64
+
 from loguru import logger
 from pydantic import ValidationError
 
+from src.integration.domain.entities import Album, Track, Playlist, MusicSource
+from src.integration.domain.exceptions import (
+    ExternalApiUnauthorizedError,
+    ExternalApiEmptyResponseError,
+    ExternalApiInvalidResponseError,
+)
 from src.integration.application.interfaces.http_client import IHTTPClient
 from src.transfer.application.interfaces.transfer_client import (
     ITransferClient,
-    TAuthData,
-    TToken,
 )
-from src.integration.domain.entities import Album, MusicSource, Playlist, Track
-from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError, ExternalApiUnauthorizedError
 from src.integration.infrastructure.external_api.spotify.entities import (
+    SpotifyUser,
     SpotifyAlbum,
+    SpotifyToken,
+    SpotifyTrack,
     SpotifyAuthData,
     SpotifyPlaylist,
     SpotifyResponse,
-    SpotifyToken,
-    SpotifyTrack,
-    SpotifyUser,
 )
 
 
@@ -71,6 +74,24 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             for album in albums
         ]
 
+    async def get_user_favorites_tracks(self, token: SpotifyToken, total=None, offset=0, count=50) -> list[Track]:
+        if total is None or offset + count >= total:
+            return []
+
+        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", bearer_token=token.access_token, params={"limit": 50})
+        try:
+            result = SpotifyResponse.model_validate(response)
+            if not result.items:
+                raise ExternalApiEmptyResponseError()
+            tracks = [SpotifyTrack.model_validate(i) for i in result.items]
+        except ValidationError as e:
+            raise ExternalApiInvalidResponseError(str(e)) from e
+        tracks = [self._track_to_domain(track) for track in tracks]
+
+        tracks += await self.get_user_favorites_tracks(token, response.get("total", 0), offset + len(tracks))
+
+        return tracks
+
     async def get_user_playlists(self, token: SpotifyToken) -> list[Playlist]:
         response = await self.http_client.get(
             self.API_URL + "/v1/me/playlists",
@@ -103,7 +124,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             raise ExternalApiInvalidResponseError(str(e))
         return [self._track_to_domain(track) for track in tracks]
 
-    async def create_user_playlist(self, token: SpotifyToken, name: str) -> str:
+    async def create_user_playlist(self, token: SpotifyToken, name: str) -> Playlist:
         user_info = await self._get_current_user_info(token.access_token)
         response = await self.http_client.post(
             self.API_URL + f"/v1/users/{user_info.id}/playlists",
@@ -113,8 +134,8 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         try:
             result = SpotifyPlaylist.model_validate(response)
         except ValidationError as e:
-            raise ExternalApiInvalidResponseError(str(e))
-        return result.id
+            raise ExternalApiInvalidResponseError(str(e)) from e
+        return self._playlist_to_domain(result)
 
     async def add_user_album(
         self, token: SpotifyToken, album_name: str, artist_name: str
@@ -184,7 +205,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             token = SpotifyToken.model_validate_json(token_raw)
         except ValidationError:
             raise ValueError("Invalid token")
-        
+
         try:
             await self._get_current_user_info(token.access_token)
         except ExternalApiUnauthorizedError as e:
@@ -211,6 +232,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             source=MusicSource.SPOTIFY,
             name=model.name,
             tracks_count=model.tracks.total,
+            url=model.external_urls.spotify,
             image_url=model.images[-1].url if model.images else None,
         )
 

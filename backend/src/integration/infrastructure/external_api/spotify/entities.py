@@ -27,9 +27,13 @@ class SpotifyPlaylist(BaseModel):
     class SpotifyPlaylistTracksInfo(BaseModel):
         total: int
 
+    class ExternalUrls(BaseModel):
+        spotify: str
+
     description: str | None = None
     id: str
     images: list[SpotifyPlaylistImage] | None = Field(description="Expire in 1 day", default=None)
+    external_urls: ExternalUrls
     name: str
     uri: str
     tracks: SpotifyPlaylistTracksInfo

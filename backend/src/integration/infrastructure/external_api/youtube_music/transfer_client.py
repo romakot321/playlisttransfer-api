@@ -1,5 +1,5 @@
 import json
-from typing import TypeVar
+from typing import Type, TypeVar
 from pydantic import BaseModel, ValidationError
 from src.integration.application.interfaces.http_client import IHTTPClient
 from src.integration.domain.exceptions import (
@@ -48,6 +48,9 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             raise ExternalApiEmptyResponseError()
         return response.get("items")[0]
 
+    async def get_user_favorites_tracks(self, token: YoutubeToken, total=None, offset=0, count=50) -> list[Track]:
+        raise ExternalApiError("Youtube not implemented favorites tracks")
+
     async def get_user_playlists(self, token: YoutubeToken) -> list[Playlist]:
         response = await self.api.request(
             "GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": 1}
@@ -65,14 +68,14 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
         tracks = self._parse_response(response, YoutubeTrack)
         return [self._track_to_domain(track) for track in tracks]
 
-    async def create_user_playlist(self, token: YoutubeToken, name: str) -> str:
+    async def create_user_playlist(self, token: YoutubeToken, name: str) -> Playlist:
         resource = {"snippet": {"title": name}}
         response = await self.api.request("POST", "/youtube/v3/playlists", bearer_token=token.token, json=resource)
         try:
             playlist = YoutubePlaylist.model_validate(response)
-        except ValidationError:
-            raise ExternalApiInvalidResponseError()
-        return playlist.id
+        except ValidationError as e:
+            raise ExternalApiInvalidResponseError() from e
+        return self._playlist_to_domain(playlist)
 
     async def search_for_track(self, token: YoutubeToken, query: str) -> str:
         response = await self.api.request(
@@ -126,7 +129,7 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             await self.api.request("POST", "/youtube/v3/playlistItems", bearer_token=token.token, json=resource)
 
     @staticmethod
-    def _parse_response(response: dict, items_model: T) -> list[T]:
+    def _parse_response(response: dict, items_model: Type[T]) -> list[T]:
         try:
             result = YoutubeResponse.model_validate(response)
             if not result.items:

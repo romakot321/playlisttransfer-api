@@ -28,7 +28,6 @@ class HTTPApiClient:
         func = getattr(self.client, method.lower())
         return await func(
             url,
-            path=path,
             headers=headers,
             json=json,
             params=params,

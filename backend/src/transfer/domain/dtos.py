@@ -1,7 +1,7 @@
-from enum import Enum
 from uuid import UUID
+from typing import Any
 
-from pydantic import AliasChoices, BaseModel, Field
+from pydantic import Field, BaseModel, AliasChoices, field_validator
 
 from src.transfer.domain.entities import TransferSource, TransferStatus
 
@@ -45,18 +45,11 @@ class TransferAlbumCreateDTO(BaseModel):
     album_id: str
 
 
-class TransferReadDTO(BaseModel):
-    id: UUID
-    status: TransferStatus
-    error: str | None = None
-    user_id: str
-    app_bundle: str
-
-
 class PlaylistReadDTO(BaseModel):
     id: str = Field(validation_alias=AliasChoices("source_id", "id"))
     name: str
     source: TransferSource
+    url: str | None = None
     image_url: str | None = None
 
 
@@ -72,4 +65,20 @@ class TrackReadDTO(BaseModel):
     name: str
     artist: str
     image_url: str | None = None
+
+
+class TransferReadDTO(BaseModel):
+    id: UUID
+    status: TransferStatus
+    error: str | None = None
+    result: PlaylistReadDTO | None = None
+    user_id: str
+    app_bundle: str
+
+    @field_validator("result", mode="before")
+    @classmethod
+    def parse_json_result(cls, value: Any, _info) -> PlaylistReadDTO:
+        if not isinstance(value, str):
+            return value
+        return PlaylistReadDTO.model_validate_json(value)
 

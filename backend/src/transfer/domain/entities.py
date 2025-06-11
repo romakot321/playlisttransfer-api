@@ -18,6 +18,7 @@ class TransferStatus(str, Enum):
 class Transfer(BaseModel):
     id: UUID
     status: TransferStatus
+    result: str | None = None
     error: str | None = None
     user_id: str
     app_bundle: str
@@ -33,6 +34,7 @@ class TransferCreate(BaseModel):
 
 class TransferUpdate(BaseModel):
     status: TransferStatus | None = None
+    result: str | None = None
     error: str | None = None
 
 

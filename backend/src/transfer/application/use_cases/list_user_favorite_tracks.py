@@ -1,13 +1,15 @@
 from fastapi import HTTPException
+
 from src.db.exceptions import DBModelNotFoundException
-from src.transfer.application.integration_utils import get_transfer_token
+from src.transfer.domain.dtos import TrackReadDTO, PlaylistTracksListDTO
 from src.integration.domain.entities import Track
-from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
+from src.integration.domain.exceptions import ExternalApiError
+from src.transfer.application.integration_utils import get_transfer_token
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
-from src.transfer.domain.dtos import PlaylistTracksListDTO, TrackReadDTO
+from src.transfer.application.interfaces.transfer_client import TToken, ITransferClient
 
 
-class ListPlaylistTracksUseCase:
+class ListUserFavoriteTracksUseCase:
     def __init__(self, transfer_client: ITransferClient, uow: ITransferUnitOfWork) -> None:
         self.transfer_client = transfer_client
         self.uow = uow
@@ -15,7 +17,11 @@ class ListPlaylistTracksUseCase:
     async def execute(self, dto: PlaylistTracksListDTO) -> list[TrackReadDTO]:
         async with self.uow:
             token = await get_transfer_token(self.uow, self.transfer_client, dto.user_id, dto.app_bundle)
-            tracks = await self.transfer_client.get_user_playlist_tracks(token, dto.playlist_id)
+            try:
+                tracks = await self.transfer_client.get_user_favorites_tracks(token)
+            except ExternalApiError as e:
+                # Probably Not implemented error
+                raise HTTPException(400, detail=str(e)) from e
         return [self._to_dto(m) for m in tracks]
 
     @staticmethod

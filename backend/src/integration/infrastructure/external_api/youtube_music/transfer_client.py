@@ -56,7 +56,10 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
 
     async def get_user_playlists(self, token: YoutubeToken) -> list[Playlist]:
         response = await self.api.request(
-            "GET", "/youtube/v3/playlists", bearer_token=token.token, params={"maxResults": 50, "mine": 1, "part": "snippet,id"}
+            "GET",
+            "/youtube/v3/playlists",
+            bearer_token=token.token,
+            params={"maxResults": 50, "mine": 1, "part": "snippet,id"},
         )
         playlists = self._parse_response(response, YoutubePlaylist)
         return [self._playlist_to_domain(playlist) for playlist in playlists]
@@ -149,21 +152,28 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             source_id=model.id,
             source=MusicSource.YOUTUBE,
             name=model.snippet.title,
-            image_url=model.snippet.thumbnails[list(model.snippet.thumbnails.keys())[0]].url
-            if model.snippet.thumbnails
-            else None,
+            url="https://www.youtube.com/playlist?list=" + model.id,
+            image_url=(
+                model.snippet.thumbnails[list(model.snippet.thumbnails.keys())[0]].url
+                if model.snippet.thumbnails
+                else None
+            ),
         )
 
     @staticmethod
     def _track_to_domain(model: YoutubeTrack) -> Track:
         return Track(
-            source_id=model.snippet.resource_id
-            if isinstance(model.snippet.resource_id, str)
-            else model.snippet.resource_id.model_dump_json(),
+            source_id=(
+                model.snippet.resource_id
+                if isinstance(model.snippet.resource_id, str)
+                else model.snippet.resource_id.model_dump_json()
+            ),
             source=MusicSource.YOUTUBE,
             name=model.snippet.title,
             artist_name=model.snippet.channel_title,
-            image_url=model.snippet.thumbnails[list(model.snippet.thumbnails.keys())[0]].url
-            if model.snippet.thumbnails
-            else None,
+            image_url=(
+                model.snippet.thumbnails[list(model.snippet.thumbnails.keys())[0]].url
+                if model.snippet.thumbnails
+                else None
+            ),
         )

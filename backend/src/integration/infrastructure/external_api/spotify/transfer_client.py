@@ -79,7 +79,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         if total is not None and offset + count >= total:
             return []
 
-        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", bearer_token=token.access_token, params={"limit": count, "offset": offset})
+        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", headers={"Authorization": "Bearer " + token.access_token}, params={"limit": count, "offset": offset})
         logger.debug(response)
         try:
             result = SpotifyResponse.model_validate(response)

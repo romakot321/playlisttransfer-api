@@ -4,7 +4,7 @@ from loguru import logger
 from src.db.exceptions import DBModelNotFoundException
 from src.transfer.domain.dtos import TrackReadDTO, PlaylistTracksListDTO
 from src.integration.domain.entities import Track
-from src.integration.domain.exceptions import ExternalApiError
+from src.integration.domain.exceptions import ExternalApiError, ExternalApiUnauthorizedError
 from src.transfer.application.integration_utils import get_transfer_token
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
 from src.transfer.application.interfaces.transfer_client import TToken, ITransferClient
@@ -20,6 +20,8 @@ class ListUserFavoriteTracksUseCase:
             token = await get_transfer_token(self.uow, self.transfer_client, dto.user_id, dto.app_bundle)
             try:
                 tracks = await self.transfer_client.get_user_favorites_tracks(token)
+            except ExternalApiUnauthorizedError as e:
+                raise HTTPException(400, detail="Access token expired") from e
             except ExternalApiError as e:
                 # Probably Not implemented error
                 logger.exception(e)

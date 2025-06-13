@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-from src.core.auth import TokenAuthMiddleware
 from src.core.logging_setup import setup_fastapi_logging
 from src.transfer.api.rest import router as transfer_router
 

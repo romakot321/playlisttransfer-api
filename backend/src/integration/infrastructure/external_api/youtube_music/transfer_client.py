@@ -5,6 +5,7 @@ from loguru import logger
 from pydantic import BaseModel, ValidationError
 
 from src.core.config import settings
+from src.integration.application.interfaces.http_client import IHTTPClient
 from src.integration.domain.entities import Album, Track, Playlist, MusicSource
 from src.integration.domain.exceptions import (
     ExternalApiError,
@@ -12,15 +13,14 @@ from src.integration.domain.exceptions import (
     ExternalApiEmptyResponseError,
     ExternalApiInvalidResponseError,
 )
-from src.integration.infrastructure.http.api_client import HTTPApiClient
-from src.integration.application.interfaces.http_client import IHTTPClient
-from src.transfer.application.interfaces.transfer_client import ITransferClient
 from src.integration.infrastructure.external_api.youtube_music.entities import (
     YoutubeToken,
     YoutubeTrack,
     YoutubePlaylist,
     YoutubeResponse,
 )
+from src.integration.infrastructure.http.api_client import HTTPApiClient
+from src.transfer.application.interfaces.transfer_client import ITransferClient
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -77,7 +77,8 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
 
     async def create_user_playlist(self, token: YoutubeToken, name: str) -> Playlist:
         resource = {"snippet": {"title": name}}
-        response = await self.api.request("POST", "/youtube/v3/playlists", bearer_token=token.token, json=resource)
+        response = await self.api.request("POST", "/youtube/v3/playlists", bearer_token=token.token, json=resource,
+                                          params={"part": "snippet"})
         try:
             playlist = YoutubePlaylist.model_validate(response)
         except ValidationError as e:

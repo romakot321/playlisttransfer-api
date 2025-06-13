@@ -1,4 +1,5 @@
 from typing import Generic
+
 from fastapi import HTTPException
 from loguru import logger
 

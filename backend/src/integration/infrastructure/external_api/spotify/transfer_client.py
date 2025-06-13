@@ -1,5 +1,6 @@
 import base64
 
+from urllib.parse import urlencode
 from loguru import logger
 from pydantic import ValidationError
 
@@ -75,10 +76,11 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         ]
 
     async def get_user_favorites_tracks(self, token: SpotifyToken, total=None, offset=0, count=50) -> list[Track]:
-        if total is None or offset + count >= total:
+        if total is not None and offset + count >= total:
             return []
 
-        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", bearer_token=token.access_token, params={"limit": 50})
+        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", bearer_token=token.access_token, params={"limit": count, "offset": offset})
+        logger.debug(response)
         try:
             result = SpotifyResponse.model_validate(response)
             if not result.items:
@@ -191,7 +193,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
     async def _refresh_token(self, token: SpotifyToken) -> SpotifyToken:
         response = await self.http_client.post(
             "https://accounts.spotify.com/api/token",
-            form={"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id},
+            data=urlencode({"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id}),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         try:
@@ -210,7 +212,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             await self._get_current_user_info(token.access_token)
         except ExternalApiUnauthorizedError as e:
             token = await self._refresh_token(token)
-            logger.debug(f"Refreshed token: {token}")
+            logger.info(f"Refreshed token: {token}")
 
         return token
 

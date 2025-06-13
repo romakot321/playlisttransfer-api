@@ -42,7 +42,7 @@ async def get_user_playlists(transfer_client: TransferClientDepend, uow: Transfe
 
 
 @router.get("/favorite", response_model=list[TrackReadDTO])
-async def get_user_favorite_tracks(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: PlaylistTracksListDTO = Depends()):
+async def get_user_favorite_tracks(transfer_client: TransferClientDepend, uow: TransferUoWDepend, params: UserPlaylistListDTO = Depends()):
     return await ListUserFavoriteTracksUseCase(transfer_client, uow).execute(params)
 
 

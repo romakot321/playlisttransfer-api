@@ -40,7 +40,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
             if response.status == 401:
                 raise ExternalApiUnauthorizedError()
             if not response.ok:
-                raise ExternalApiError(await response.text())
+                raise ExternalApiError(detail=await response.text())
             body = await response.json()
         return body
 

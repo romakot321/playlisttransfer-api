@@ -21,7 +21,7 @@ class ListUserFavoriteTracksUseCase:
             try:
                 tracks = await self.transfer_client.get_user_favorites_tracks(token)
             except ExternalApiUnauthorizedError as e:
-                raise HTTPException(400, detail="Access token expired") from e
+                raise HTTPException(400, detail=e.detail or "Access token expired") from e
             except ExternalApiError as e:
                 # Probably Not implemented error
                 logger.exception(e)

@@ -38,7 +38,7 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
         async with aiohttp.ClientSession() as session:
             response = await session.get(url, headers=headers, params=params)
             if response.status == 401:
-                raise ExternalApiUnauthorizedError()
+                raise ExternalApiUnauthorizedError(detail=await response.text())
             if not response.ok:
                 raise ExternalApiError(detail=await response.text())
             body = await response.json()

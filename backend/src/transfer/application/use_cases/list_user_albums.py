@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from src.db.exceptions import DBModelNotFoundException
-from src.integration.domain.exceptions import ExternalApiUnauthorizedError
+from src.integration.domain.exceptions import ExternalApiUnauthorizedError, ExternalApiError
 from src.transfer.application.integration_utils import get_transfer_token
 from src.integration.domain.entities import Album
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
@@ -22,4 +22,8 @@ class ListUserAlbumsUseCase:
                 raise HTTPException(
                     401, detail="Source tokens expired. Please, connect source again"
                 ) from ExternalApiUnauthorizedError
+            except ExternalApiError as e:
+                if "not implemented user albums" in e.detail:
+                    raise HTTPException(400, detail="Source not implemented user albums") from e
+                raise e
         return albums

@@ -1,4 +1,5 @@
 import aiohttp
+from loguru import logger
 
 from src.integration.application.interfaces.http_client import IHTTPClient, TResponse
 from src.integration.domain.exceptions import ExternalApiError, ExternalApiUnauthorizedError
@@ -40,7 +41,9 @@ class HTTPAsyncClient[TResponse: dict](IHTTPClient):
             if response.status == 401:
                 raise ExternalApiUnauthorizedError(detail=await response.text())
             if not response.ok:
-                raise ExternalApiError(detail=await response.text())
+                error_text = await response.text()
+                logger.warning(error_text)
+                raise ExternalApiError(detail=error_text)
             body = await response.json()
         return body
 

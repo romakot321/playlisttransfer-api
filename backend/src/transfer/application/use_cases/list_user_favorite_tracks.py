@@ -24,7 +24,8 @@ class ListUserFavoriteTracksUseCase:
                 raise HTTPException(400, detail=e.detail or "Access token expired") from e
             except ExternalApiError as e:
                 # Probably Not implemented error
-                logger.exception(e)
+                if "not implemented user albums" not in e.detail:
+                    logger.exception(e)
                 raise HTTPException(400, detail=e.detail) from e
         return [self._to_dto(m) for m in tracks]
 

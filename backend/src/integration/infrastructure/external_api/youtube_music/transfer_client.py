@@ -76,9 +76,9 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
         return [self._track_to_domain(track) for track in tracks]
 
     async def create_user_playlist(self, token: YoutubeToken, name: str) -> Playlist:
-        resource = {"snippet": {"title": name}}
+        resource = {"snippet": {"title": name}, "status": {"privacyStatus":  "public"}}
         response = await self.api.request("POST", "/youtube/v3/playlists", bearer_token=token.token, json=resource,
-                                          params={"part": "snippet"})
+                                          params={"part": "snippet,status"})
         try:
             playlist = YoutubePlaylist.model_validate(response)
         except ValidationError as e:
@@ -92,12 +92,9 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             bearer_token=token.token,
             params={"part": "snippet", "q": query, "type": "video", "videoCategoryId": "10", "maxResults": 1},
         )
+        logger.debug(f"Search track response {response}")
         tracks: list[YoutubeTrack] = self._parse_response(response, YoutubeTrack)
-        return (
-            tracks[0].snippet.resource_id.model_dump_json()
-            if not isinstance(tracks[0].snippet.resource_id, str)
-            else tracks[0].snippet.resource_id
-        )
+        return json.dumps(tracks[0].id) if isinstance(tracks[0].id, dict) else tracks[0].id
 
     async def _refresh_token(self, token: YoutubeToken) -> YoutubeToken:
         json = {
@@ -134,7 +131,7 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             if track_id.startswith("{"):
                 track_id = json.loads(track_id)
             resource = {"snippet": {"playlistId": playlist_id, "resourceId": track_id}}
-            await self.api.request("POST", "/youtube/v3/playlistItems", bearer_token=token.token, json=resource)
+            await self.api.request("POST", "/youtube/v3/playlistItems", bearer_token=token.token, json=resource, params={"part": "snippet"})
 
     @staticmethod
     def _parse_response(response: dict, items_model: Type[T]) -> list[T]:
@@ -165,9 +162,9 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
     def _track_to_domain(model: YoutubeTrack) -> Track:
         return Track(
             source_id=(
-                model.snippet.resource_id
-                if isinstance(model.snippet.resource_id, str)
-                else model.snippet.resource_id.model_dump_json()
+                (model.snippet.resource_id or model.id)
+                if isinstance((model.snippet.resource_id or model.id), str)
+                else (model.snippet.resource_id or model.id).model_dump_json()
             ),
             source=MusicSource.YOUTUBE,
             name=model.snippet.title,

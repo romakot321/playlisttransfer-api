@@ -1,6 +1,7 @@
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.db.exceptions import DBModelConflictException, DBModelNotFoundException
 from src.transfer.application.interfaces.source_token_repository import ISourceTokenRepository
 from src.transfer.domain.entities import SourceToken, SourceTokenCreate, SourceTokenUpdate, TransferSource
@@ -30,7 +31,8 @@ class PGSourceTokenRepository(ISourceTokenRepository):
         return self._to_domain(model)
 
     async def _update_existed(self, data: SourceTokenCreate) -> SourceToken | None:
-        query = update(SourceTokenDB).filter_by(user_id=data.user_id, app_bundle=data.app_bundle, source=data.source).values(token_data=data.token_data)
+        query = update(SourceTokenDB).filter_by(user_id=data.user_id, app_bundle=data.app_bundle,
+                                                source=data.source).values(token_data=data.token_data)
         result = await self.session.execute(query)
         if result.rowcount == 0:
             return None
@@ -46,7 +48,8 @@ class PGSourceTokenRepository(ISourceTokenRepository):
         return self._to_domain(model)
 
     async def update_by_user(self, user_id: str, app_bundle: str, source: str, data: SourceTokenUpdate) -> SourceToken:
-        query = update(SourceTokenDB).filter_by(user_id=user_id, app_bundle=app_bundle, source=source).values(**data.model_dump(mode="json", exclude_unset=True))
+        query = update(SourceTokenDB).filter_by(user_id=user_id, app_bundle=app_bundle, source=source).values(
+            **data.model_dump(mode="json", exclude_unset=True))
         await self.session.execute(query)
         await self._flush()
         return await self.get_by_user(user_id, app_bundle, source)

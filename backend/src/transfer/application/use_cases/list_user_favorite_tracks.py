@@ -1,13 +1,12 @@
 from fastapi import HTTPException
 from loguru import logger
 
-from src.db.exceptions import DBModelNotFoundException
-from src.transfer.domain.dtos import TrackReadDTO, PlaylistTracksListDTO
 from src.integration.domain.entities import Track
 from src.integration.domain.exceptions import ExternalApiError, ExternalApiUnauthorizedError
 from src.transfer.application.integration_utils import get_transfer_token
+from src.transfer.application.interfaces.transfer_client import ITransferClient
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
-from src.transfer.application.interfaces.transfer_client import TToken, ITransferClient
+from src.transfer.domain.dtos import TrackReadDTO, PlaylistTracksListDTO
 
 
 class ListUserFavoriteTracksUseCase:

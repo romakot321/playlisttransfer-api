@@ -1,8 +1,10 @@
 from typing import Generic
-from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
+
 from fastapi import HTTPException
 
-from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError
+from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, \
+    ExternalApiInvalidResponseError
+from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 
 
 class CreateUserPlaylistUseCase(Generic[TToken]):

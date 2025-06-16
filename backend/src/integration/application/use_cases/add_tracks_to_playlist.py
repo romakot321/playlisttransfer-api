@@ -1,8 +1,10 @@
 from typing import Generic
+
 from fastapi import HTTPException
 
+from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, \
+    ExternalApiInvalidResponseError
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
-from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError
 
 
 class AddTracksToPlaylist(Generic[TToken]):

@@ -1,10 +1,11 @@
 from typing import Generic
 
-from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
-from src.integration.domain.entities import Track
 from fastapi import HTTPException
 
-from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, ExternalApiInvalidResponseError
+from src.integration.domain.entities import Track
+from src.integration.domain.exceptions import ExternalApiEmptyResponseError, ExternalApiError, \
+    ExternalApiInvalidResponseError
+from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 
 
 class GetUserPlaylistTracks(Generic[TToken]):

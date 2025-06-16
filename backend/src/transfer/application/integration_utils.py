@@ -1,12 +1,13 @@
 from fastapi import HTTPException
+
 from src.db.exceptions import DBModelNotFoundException
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
-from src.transfer.domain.dtos import UserPlaylistListDTO
 from src.transfer.domain.entities import SourceTokenUpdate
 
 
-async def get_transfer_token(uow: ITransferUnitOfWork, transfer_client: ITransferClient, user_id: str, app_bundle: str) -> TToken:
+async def get_transfer_token(uow: ITransferUnitOfWork, transfer_client: ITransferClient, user_id: str,
+                             app_bundle: str) -> TToken:
     try:
         source_token = await uow.source_tokens.get_by_user(
             user_id, app_bundle, transfer_client.SOURCE

@@ -1,5 +1,5 @@
-from uuid import UUID
 from typing import Any
+from uuid import UUID
 
 from pydantic import Field, BaseModel, AliasChoices, field_validator
 
@@ -32,17 +32,18 @@ class UserAlbumListDTO(BaseModel):
 class TransferPlaylistCreateDTO(BaseModel):
     user_id: str
     app_bundle: str
-    from_source: TransferSource
-    to_source: TransferSource
     playlist_id: str
 
 
 class TransferAlbumCreateDTO(BaseModel):
     user_id: str
     app_bundle: str
-    from_source: TransferSource
-    to_source: TransferSource
     album_id: str
+
+
+class TransferFavoriteCreateDTO(BaseModel):
+    user_id: str
+    app_bundle: str
 
 
 class PlaylistReadDTO(BaseModel):
@@ -81,4 +82,3 @@ class TransferReadDTO(BaseModel):
         if not isinstance(value, str):
             return value
         return PlaylistReadDTO.model_validate_json(value)
-

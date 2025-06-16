@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Header, Request, HTTPException
-from src.core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from src.core.config import settings
 
 
 class TokenAuthMiddleware(BaseHTTPMiddleware):

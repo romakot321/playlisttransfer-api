@@ -1,5 +1,6 @@
 import json
 from typing import Generic
+
 from src.transfer.application.interfaces.transfer_client import (
     ITransferClient,
     TAuthData,
@@ -11,7 +12,7 @@ from src.transfer.domain.entities import SourceTokenCreate, TransferSource
 
 class ConnectSourceUseCase(Generic[TAuthData]):
     def __init__(
-        self, transfer_client: ITransferClient, uow: ITransferUnitOfWork
+            self, transfer_client: ITransferClient, uow: ITransferUnitOfWork
     ) -> None:
         self.transfer_client = transfer_client
         self.uow = uow

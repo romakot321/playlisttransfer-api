@@ -7,11 +7,11 @@ from src.integration.domain.entities import Playlist, Track
 from src.transfer.application.integration_utils import get_transfer_token
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
-from src.transfer.domain.dtos import TransferPlaylistCreateDTO
+from src.transfer.domain.dtos import TransferPlaylistCreateDTO, TransferFavoriteCreateDTO
 from src.transfer.domain.entities import TransferStatus, TransferUpdate
 
 
-class RunPlaylistTransferUseCase:
+class RunFavoriteTransferUseCase:
     def __init__(
             self, from_transfer_client: ITransferClient, to_transfer_client: ITransferClient, uow: ITransferUnitOfWork
     ) -> None:
@@ -21,7 +21,7 @@ class RunPlaylistTransferUseCase:
         self._from_token: TToken | None = None
         self._to_token: TToken | None = None
 
-    async def execute(self, transfer_id: UUID, dto: TransferPlaylistCreateDTO) -> None:
+    async def execute(self, transfer_id: UUID, dto: TransferFavoriteCreateDTO) -> None:
         logger.info(f"Started transfer {transfer_id} {dto=}")
         async with self.uow:
             await self.set_transfer_status(transfer_id, TransferStatus.started)
@@ -34,7 +34,7 @@ class RunPlaylistTransferUseCase:
         try:
             await self.get_from_transfer_token(dto)
             await self.get_to_transfer_token(dto)
-            tracks = await self.get_tracks_to_transfer(dto)
+            tracks = await self.get_tracks_to_transfer()
             playlist = await self.transfer_tracks(tracks)
         except Exception as e:
             await self.set_transfer_status(transfer_id, TransferStatus.failed, error=str(e))
@@ -47,21 +47,19 @@ class RunPlaylistTransferUseCase:
         await self.uow.transfers.update_by_pk(transfer_id, TransferUpdate(status=status, error=error, result=result))
         await self.uow.commit()
 
-    async def get_tracks_to_transfer(self, dto: TransferPlaylistCreateDTO) -> list[Track]:
-        return await self.from_transfer_client.get_user_playlist_tracks(self._from_token, dto.playlist_id)
+    async def get_tracks_to_transfer(self) -> list[Track]:
+        return await self.from_transfer_client.get_user_favorites_tracks(self._from_token)
 
     async def search_for_tracks(self, tracks: list[Track]) -> list[str]:
         ret = []
         for track in tracks:
-            founded_track_id = await self.to_transfer_client.search_for_track(
-                self._to_token, track.name + " " + track.artist_name
-            )
+            founded_track_id = await self.to_transfer_client.search_for_track(self._to_token, track.name + " " + track.artist_name)
             ret.append(founded_track_id)
         return ret
 
     async def transfer_tracks(self, tracks: list[Track]) -> Playlist:
         new_playlist = await self.to_transfer_client.create_user_playlist(
-            self._to_token, "Transfered " + dt.date.today().isoformat()
+            self._to_token, "Favorites. Transferred " + dt.date.today().isoformat()
         )
         tracks_ids = await self.search_for_tracks(tracks)
         await self.to_transfer_client.add_tracks_to_playlist(self._to_token, new_playlist.source_id, *tracks_ids)

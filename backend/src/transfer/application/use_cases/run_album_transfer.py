@@ -1,18 +1,18 @@
 from uuid import UUID
+
 from loguru import logger
-import datetime as dt
-from fastapi import HTTPException
-from src.db.exceptions import DBModelNotFoundException
+
+from src.integration.domain.entities import Album
 from src.transfer.application.integration_utils import get_transfer_token
-from src.integration.domain.entities import Album, Track
 from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
 from src.transfer.domain.dtos import TransferAlbumCreateDTO
-from src.transfer.domain.entities import Transfer, TransferStatus, TransferUpdate
+from src.transfer.domain.entities import TransferStatus, TransferUpdate
 
 
 class RunAlbumTransferUseCase:
-    def __init__(self, from_transfer_client: ITransferClient, to_transfer_client: ITransferClient, uow: ITransferUnitOfWork) -> None:
+    def __init__(self, from_transfer_client: ITransferClient, to_transfer_client: ITransferClient,
+                 uow: ITransferUnitOfWork) -> None:
         self.from_transfer_client = from_transfer_client
         self.to_transfer_client = to_transfer_client
         self.uow = uow
@@ -57,4 +57,3 @@ class RunAlbumTransferUseCase:
 
     async def get_to_transfer_token(self, dto: TransferAlbumCreateDTO) -> None:
         self._to_token = await get_transfer_token(self.uow, self.to_transfer_client, dto.user_id, dto.app_bundle)
-

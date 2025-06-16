@@ -1,18 +1,15 @@
 import base64
-
 from urllib.parse import urlencode
+
 from loguru import logger
 from pydantic import ValidationError
 
+from src.integration.application.interfaces.http_client import IHTTPClient
 from src.integration.domain.entities import Album, Track, Playlist, MusicSource
 from src.integration.domain.exceptions import (
     ExternalApiUnauthorizedError,
     ExternalApiEmptyResponseError,
     ExternalApiInvalidResponseError,
-)
-from src.integration.application.interfaces.http_client import IHTTPClient
-from src.transfer.application.interfaces.transfer_client import (
-    ITransferClient,
 )
 from src.integration.infrastructure.external_api.spotify.entities import (
     SpotifyUser,
@@ -22,6 +19,9 @@ from src.integration.infrastructure.external_api.spotify.entities import (
     SpotifyAuthData,
     SpotifyPlaylist,
     SpotifyResponse,
+)
+from src.transfer.application.interfaces.transfer_client import (
+    ITransferClient,
 )
 
 
@@ -34,7 +34,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
     STATE: str = "c459138cn57"
 
     def __init__(
-        self, http_client: IHTTPClient[dict], client_id: str, client_secret: str
+            self, http_client: IHTTPClient[dict], client_id: str, client_secret: str
     ) -> None:
         self.http_client = http_client
         self._client_id = client_id
@@ -62,7 +62,8 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             raise ExternalApiInvalidResponseError(str(e))
 
     async def get_user_albums(self, token: SpotifyToken) -> list[Album]:
-        response = await self.http_client.get(self.API_URL + "/v1/me/albums", params={"limit": 50}, headers={"Authorization": "Bearer " + token.access_token})
+        response = await self.http_client.get(self.API_URL + "/v1/me/albums", params={"limit": 50},
+                                              headers={"Authorization": "Bearer " + token.access_token})
         try:
             result = SpotifyResponse.model_validate(response)
             if not result.items:
@@ -79,7 +80,9 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         if total is not None and offset + count >= total:
             return []
 
-        response = await self.http_client.get(self.API_URL + "/v1/me/tracks", headers={"Authorization": "Bearer " + token.access_token}, params={"limit": count, "offset": offset})
+        response = await self.http_client.get(self.API_URL + "/v1/me/tracks",
+                                              headers={"Authorization": "Bearer " + token.access_token},
+                                              params={"limit": count, "offset": offset})
         logger.debug(response)
         try:
             result = SpotifyResponse.model_validate(response)
@@ -110,7 +113,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         return [self._playlist_to_domain(playlist) for playlist in playlists]
 
     async def get_user_playlist_tracks(
-        self, token: SpotifyToken, playlist_id: str
+            self, token: SpotifyToken, playlist_id: str
     ) -> list[Track]:
         response = await self.http_client.get(
             self.API_URL + f"/v1/playlists/{playlist_id}/tracks",
@@ -140,7 +143,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         return self._playlist_to_domain(result)
 
     async def add_user_album(
-        self, token: SpotifyToken, album_name: str, artist_name: str
+            self, token: SpotifyToken, album_name: str, artist_name: str
     ) -> None:
         album_id = await self.search_for_album(token, album_name, artist_name)
         await self.http_client.put(
@@ -150,7 +153,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         )
 
     async def add_tracks_to_playlist(
-        self, token: SpotifyToken, playlist_id: str, *tracks_ids: list[str]
+            self, token: SpotifyToken, playlist_id: str, *tracks_ids: list[str]
     ) -> None:
         await self.http_client.post(
             self.API_URL + f"/v1/playlists/{playlist_id}/tracks",
@@ -174,7 +177,7 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
         return track.track.uri
 
     async def search_for_album(
-        self, token: SpotifyToken, name: str, artist: str
+            self, token: SpotifyToken, name: str, artist: str
     ) -> str:
         response = await self.http_client.get(
             self.API_URL + "/v1/search",
@@ -193,7 +196,8 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
     async def _refresh_token(self, token: SpotifyToken) -> SpotifyToken:
         response = await self.http_client.post(
             "https://accounts.spotify.com/api/token",
-            data=urlencode({"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id}),
+            data=urlencode(
+                {"grant_type": "refresh_token", "refresh_token": token.refresh_token, "client_id": self._client_id}),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         try:
@@ -218,10 +222,10 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
 
     def _make_server_auth_header_token(self) -> str:
         return (
-            "Basic "
-            + base64.b64encode(
-                (self._client_id + ":" + self._client_secret).encode()
-            ).decode()
+                "Basic "
+                + base64.b64encode(
+            (self._client_id + ":" + self._client_secret).encode()
+        ).decode()
         )
 
     def _make_client_auth_header(self, token: SpotifyToken) -> dict[str, str]:

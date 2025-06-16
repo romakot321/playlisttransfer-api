@@ -76,7 +76,7 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
         return [self._track_to_domain(track) for track in tracks]
 
     async def create_user_playlist(self, token: YoutubeToken, name: str) -> Playlist:
-        resource = {"snippet": {"title": name}, "status": {"privacyStatus":  "public"}}
+        resource = {"snippet": {"title": name}, "status": {"privacyStatus": "public"}}
         response = await self.api.request("POST", "/youtube/v3/playlists", bearer_token=token.token, json=resource,
                                           params={"part": "snippet,status"})
         try:
@@ -131,7 +131,8 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             if track_id.startswith("{"):
                 track_id = json.loads(track_id)
             resource = {"snippet": {"playlistId": playlist_id, "resourceId": track_id}}
-            await self.api.request("POST", "/youtube/v3/playlistItems", bearer_token=token.token, json=resource, params={"part": "snippet"})
+            await self.api.request("POST", "/youtube/v3/playlistItems", bearer_token=token.token, json=resource,
+                                   params={"part": "snippet"})
 
     @staticmethod
     def _parse_response(response: dict, items_model: Type[T]) -> list[T]:

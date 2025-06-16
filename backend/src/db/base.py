@@ -1,7 +1,8 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import MetaData, text
 import datetime as dt
 from uuid import UUID
+
+from sqlalchemy import MetaData, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 DB_NAMING_CONVENTION = {
     "ix": "%(column_0_label)s_idx",
@@ -20,4 +21,3 @@ class BaseMixin:
     id: Mapped[UUID] = mapped_column(server_default=text("gen_random_uuid()"), primary_key=True, index=True)
     created_at: Mapped[dt.datetime] = mapped_column(server_default=text("now()"), default=dt.datetime.now)
     updated_at: Mapped[dt.datetime | None] = mapped_column(nullable=True, onupdate=text("now()"))
-

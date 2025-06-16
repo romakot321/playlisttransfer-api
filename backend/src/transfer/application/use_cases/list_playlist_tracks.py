@@ -1,8 +1,6 @@
-from fastapi import HTTPException
-from src.db.exceptions import DBModelNotFoundException
-from src.transfer.application.integration_utils import get_transfer_token
 from src.integration.domain.entities import Track
-from src.transfer.application.interfaces.transfer_client import ITransferClient, TToken
+from src.transfer.application.integration_utils import get_transfer_token
+from src.transfer.application.interfaces.transfer_client import ITransferClient
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
 from src.transfer.domain.dtos import PlaylistTracksListDTO, TrackReadDTO
 

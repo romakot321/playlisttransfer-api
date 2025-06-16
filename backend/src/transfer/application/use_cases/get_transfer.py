@@ -3,8 +3,8 @@ from uuid import UUID
 from fastapi import HTTPException
 
 from src.db.exceptions import DBModelNotFoundException
-from src.transfer.domain.dtos import TransferReadDTO
 from src.transfer.application.interfaces.unit_of_work import ITransferUnitOfWork
+from src.transfer.domain.dtos import TransferReadDTO
 
 
 class GetTransferUseCase:

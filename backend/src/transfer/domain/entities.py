@@ -1,5 +1,6 @@
 from enum import Enum
 from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -54,4 +55,3 @@ class SourceTokenCreate(BaseModel):
 
 class SourceTokenUpdate(BaseModel):
     token_data: str | None = None
-

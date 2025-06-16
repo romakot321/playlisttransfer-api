@@ -39,6 +39,7 @@ class YoutubeTrack(BaseModel):
 
         title: str
         channel_title: str | None = Field(validation_alias="channelTitle", default=None)
+        video_owner_channel_title: str | None = Field(validation_alias="videoOwnerChannelTitle", default=None)
         playlist_id: str | None = Field(validation_alias="playlistId", default=None)
         thumbnails: dict[str, YoutubeTrackSnippetThumbnail]
         resource_id: YoutubeTrackSnippetResourceId | str | None = Field(validation_alias="resourceId", default=None)

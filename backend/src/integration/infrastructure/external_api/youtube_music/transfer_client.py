@@ -65,7 +65,6 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
         return [self._playlist_to_domain(playlist) for playlist in playlists]
 
     async def get_user_playlist_tracks(self, token: YoutubeToken, playlist_id: str) -> list[Track]:
-        logger.debug({"playlistId": playlist_id, "maxResults": 50, "part": "snippet"})
         response = await self.api.request(
             "GET",
             "/youtube/v3/playlistItems",
@@ -85,14 +84,14 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             raise ExternalApiInvalidResponseError() from e
         return self._playlist_to_domain(playlist)
 
-    async def search_for_track(self, token: YoutubeToken, query: str) -> str:
+    async def search_for_track(self, token: YoutubeToken, track: str, artist: str) -> str:
+        query = track + " " + artist
         response = await self.api.request(
             "GET",
             "/youtube/v3/search",
             bearer_token=token.token,
             params={"part": "snippet", "q": query, "type": "video", "videoCategoryId": "10", "maxResults": 1},
         )
-        logger.debug(f"Search track response {response}")
         tracks: list[YoutubeTrack] = self._parse_response(response, YoutubeTrack)
         return json.dumps(tracks[0].id) if isinstance(tracks[0].id, dict) else tracks[0].id
 
@@ -168,7 +167,7 @@ class YoutubeMusicTransferClient[TToken: YoutubeToken](ITransferClient):
             ),
             source=MusicSource.YOUTUBE,
             name=model.snippet.title,
-            artist_name=model.snippet.channel_title,
+            artist_name=model.snippet.video_owner_channel_title,
             image_url=(
                 model.snippet.thumbnails[list(model.snippet.thumbnails.keys())[0]].url
                 if model.snippet.thumbnails

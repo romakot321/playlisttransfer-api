@@ -52,6 +52,7 @@ class PGTransferRepository(ITransferRepository):
         return Transfer(
             id=model.id,
             status=TransferStatus(model.status),
+            result=model.result,
             error=model.error,
             user_id=model.user_id,
             app_bundle=model.app_bundle

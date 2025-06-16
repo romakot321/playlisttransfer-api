@@ -80,7 +80,6 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             return []
 
         response = await self.http_client.get(self.API_URL + "/v1/me/tracks", headers={"Authorization": "Bearer " + token.access_token}, params={"limit": count, "offset": offset})
-        logger.debug(response)
         try:
             result = SpotifyResponse.model_validate(response)
             if not result.items:
@@ -158,7 +157,9 @@ class SpotifyTransferClient[TAuthData: SpotifyAuthData, TToken: SpotifyToken](
             headers={"Authorization": "Bearer " + token.access_token},
         )
 
-    async def search_for_track(self, token: SpotifyToken, query: str) -> str:
+    async def search_for_track(self, token: SpotifyToken, track: str, artist: str) -> str:
+        query = f"track:{track} artist:{artist}"
+        query  = query.replace(" ", "%20").replace(":", "%3A")
         response = await self.http_client.get(
             self.API_URL + "/v1/search",
             headers={"Authorization": "Bearer " + token.access_token},

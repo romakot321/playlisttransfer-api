@@ -31,7 +31,7 @@ async def connect_source(data: UserSourceConnectDTO, transfer_client: TransferCl
 async def start_playlist_transfer(data: TransferPlaylistCreateDTO, from_transfer_client: FromTransferClientDepend,
                                   to_transfer_client: ToTransferClientDepend, uow: TransferUoWDepend,
                                   background_tasks: BackgroundTasks):
-    transfer = await CreateTransferUseCase(uow).execute(data)
+    transfer = await CreateTransferUseCase(uow).execute(from_transfer_client.SOURCE, to_transfer_client.SOURCE, data)
     background_tasks.add_task(RunPlaylistTransferUseCase(from_transfer_client, to_transfer_client, uow).execute,
                               transfer.id, data)
     return transfer
@@ -41,7 +41,7 @@ async def start_playlist_transfer(data: TransferPlaylistCreateDTO, from_transfer
 async def start_album_transfer(data: TransferAlbumCreateDTO, from_transfer_client: FromTransferClientDepend,
                                to_transfer_client: ToTransferClientDepend, uow: TransferUoWDepend,
                                background_tasks: BackgroundTasks):
-    transfer = await CreateTransferUseCase(uow).execute(data)
+    transfer = await CreateTransferUseCase(uow).execute(from_transfer_client.SOURCE, to_transfer_client.SOURCE, data)
     background_tasks.add_task(RunAlbumTransferUseCase(from_transfer_client, to_transfer_client, uow).execute,
                               transfer.id, data)
     return transfer
@@ -51,7 +51,7 @@ async def start_album_transfer(data: TransferAlbumCreateDTO, from_transfer_clien
 async def start_favorite_transfer(data: TransferFavoriteCreateDTO, from_transfer_client: FromTransferClientDepend,
                                   to_transfer_client: ToTransferClientDepend, uow: TransferUoWDepend,
                                   background_tasks: BackgroundTasks):
-    transfer = await CreateTransferUseCase(uow).execute(data)
+    transfer = await CreateTransferUseCase(uow).execute(from_transfer_client.SOURCE, to_transfer_client.SOURCE, data)
     background_tasks.add_task(RunFavoriteTransferUseCase(from_transfer_client, to_transfer_client, uow).execute, transfer.id, data)
     return transfer
 

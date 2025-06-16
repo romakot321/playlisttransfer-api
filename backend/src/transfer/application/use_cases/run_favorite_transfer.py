@@ -53,7 +53,9 @@ class RunFavoriteTransferUseCase:
     async def search_for_tracks(self, tracks: list[Track]) -> list[str]:
         ret = []
         for track in tracks:
-            founded_track_id = await self.to_transfer_client.search_for_track(self._to_token, track.name + " " + track.artist_name)
+            founded_track_id = await self.to_transfer_client.search_for_track(
+                self._to_token, track.name, track.artist_name
+            )
             ret.append(founded_track_id)
         return ret
 

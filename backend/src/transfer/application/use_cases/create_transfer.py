@@ -7,8 +7,8 @@ class CreateTransferUseCase:
     def __init__(self, uow: ITransferUnitOfWork) -> None:
         self.uow = uow
 
-    async def execute(self, dto: TransferPlaylistCreateDTO | TransferAlbumCreateDTO | TransferFavoriteCreateDTO) -> Transfer:
-        command = TransferCreate(**dto.model_dump())
+    async def execute(self, from_source: str, to_source: str, dto: TransferPlaylistCreateDTO | TransferAlbumCreateDTO | TransferFavoriteCreateDTO) -> Transfer:
+        command = TransferCreate(**dto.model_dump(), from_source=from_source, to_source=to_source)
         async with self.uow:
             model = await self.uow.transfers.create(command)
             await self.uow.commit()

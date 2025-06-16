@@ -77,8 +77,7 @@ class TransferReadDTO(BaseModel):
     app_bundle: str
 
     @field_validator("result", mode="before")
-    @classmethod
-    def parse_json_result(cls, value: Any, _info) -> PlaylistReadDTO:
+    def parse_json_result(cls, value: Any) -> PlaylistReadDTO:
         if not isinstance(value, str):
             return value
         return PlaylistReadDTO.model_validate_json(value)
